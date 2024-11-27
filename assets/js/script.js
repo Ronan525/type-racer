@@ -39,6 +39,7 @@ function startTest() {
     stopButton.disabled = false;
     userInput.disabled = false;
     userInput.focus();
+    userInput.addEventListener('input', handleTyping);
 }
 
 // Function to stop the typing test
@@ -56,6 +57,8 @@ function stopTest() {
     const difficulty = document.getElementById('difficulty').value;
     document.getElementById('level').textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 
+    userInput.removeEventListener('input', handleTyping);
+
     startButton.disabled = false;
     stopButton.disabled = true;
     userInput.disabled = true;
@@ -66,9 +69,11 @@ function resetTest() {
     userInput.value = '';
     timeDisplay.textContent = '0';
     document.getElementById('wpm').textContent = '0';
+    document.getElementById('sample-text').innerHTML = 'The cat sat on the mat.';
     startButton.disabled = false;
     stopButton.disabled = true;
     userInput.disabled = true;
+    userInput.removeEventListener('input', handleTyping);
 }
 
 // Function to count the number of correct words
@@ -90,6 +95,28 @@ function countCorrectWords(sampleText, userText) {
 function calculateWPM(correctWords, timeTaken) {
     const minutes = timeTaken / 60;
     return Math.round(correctWords / minutes);
+}
+
+// Function to highlight text
+function highlightText(sampleText, userText) {
+    let highlightedText = '';
+
+    for (let i = 0; i < sampleText.length; i++) {
+        if (userText[i] === sampleText[i]) {
+            highlightedText += `<span style="color: blue;">${sampleText[i]}</span>`;
+        } else {
+            highlightedText += `<span style="color: red;">${sampleText[i]}</span>`;
+        }
+    }
+
+    document.getElementById('sample-text').innerHTML = highlightedText;
+}
+
+// Function to handle typing input
+function handleTyping() {
+    const sampleText = document.getElementById('sample-text').textContent;
+    const userText = userInput.value;
+    highlightText(sampleText, userText);
 }
 
 // Add event listeners to the buttons
