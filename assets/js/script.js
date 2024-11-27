@@ -31,15 +31,15 @@ const userInput = document.getElementById('user-input');
 const timeDisplay = document.getElementById('time');
 
 let startTime, endTime;
+let timerStarted = false;
 
 // Function to start the typing test
 function startTest() {
     startTime = new Date();
-    startButton.disabled = true;
+    timerStarted = true;
     stopButton.disabled = false;
     userInput.disabled = false;
     userInput.focus();
-    userInput.addEventListener('input', handleTyping);
 }
 
 // Function to stop the typing test
@@ -58,10 +58,10 @@ function stopTest() {
     document.getElementById('level').textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
 
     userInput.removeEventListener('input', handleTyping);
+    userInput.removeEventListener('keydown', handleKeyDown);
 
-    startButton.disabled = false;
     stopButton.disabled = true;
-    userInput.disabled = true;
+    userInput.disabled = false; // Ensure the input box is writable
 }
 
 // Function to reset the typing test
@@ -69,11 +69,17 @@ function resetTest() {
     userInput.value = '';
     timeDisplay.textContent = '0';
     document.getElementById('wpm').textContent = '0';
-    document.getElementById('sample-text').innerHTML = 'The cat sat on the mat.';
-    startButton.disabled = false;
+    const difficulty = document.getElementById('difficulty').value;
+    const sampleTextDiv = document.getElementById('sample-text');
+    const randomText = texts[difficulty][Math.floor(Math.random() * texts[difficulty].length)];
+    sampleTextDiv.textContent = randomText;
+    timerStarted = false;
     stopButton.disabled = true;
-    userInput.disabled = true;
+    userInput.disabled = false;
     userInput.removeEventListener('input', handleTyping);
+    userInput.removeEventListener('keydown', handleKeyDown);
+    userInput.addEventListener('input', handleTyping);
+    userInput.addEventListener('keydown', handleKeyDown);
 }
 
 // Function to count the number of correct words
@@ -114,14 +120,26 @@ function highlightText(sampleText, userText) {
 
 // Function to handle typing input
 function handleTyping() {
+    if (!timerStarted) {
+        startTest();
+    }
     const sampleText = document.getElementById('sample-text').textContent;
     const userText = userInput.value;
     highlightText(sampleText, userText);
 }
 
-// Add event listeners to the buttons
-startButton.addEventListener('click', startTest);
-stopButton.addEventListener('click', stopTest);
+// Function to handle keydown events
+function handleKeyDown(event) {
+    if (event.key === 'Enter') {
+        stopTest();
+    }
+}
+
+// Add event listeners to the input box
+userInput.addEventListener('input', handleTyping);
+userInput.addEventListener('keydown', handleKeyDown);
+
+// Add event listener to the retry button
 retryButton.addEventListener('click', resetTest);
 
 // Initialize the test state
